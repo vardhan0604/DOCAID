@@ -1,12 +1,11 @@
-"use client";
-import React, { useState } from "react";
+"use client"
+import React, { useState } from 'react';
 
 export default function EnhancedAddMedicineForm() {
   const [medicines, setMedicines] = useState([
-    { id: 1, name: "Aspirin" },
-    { id: 2, name: "Paracetamol" },
+  
   ]);
-  const [newMedicine, setNewMedicine] = useState("");
+  const [newMedicine, setNewMedicine] = useState('');
   const [error, setError] = useState(null);
   const [alternatives, setAlternatives] = useState([]);
   const [showAlternatives, setShowAlternatives] = useState(false);
@@ -37,10 +36,14 @@ export default function EnhancedAddMedicineForm() {
       setError('*Medicine already exists in the list.');
       return;
     }
-  
+    if(medicines.length == 0){
+        setMedicines([{ id: medicines.length + 1, name : newMedicine}])
+        return;
+    }
     setLoading(true);
   
     // Call the API to check compatibility
+    console.log( medicines.map(med => med.name) , newMedicine)
     const response = await fetch('http://localhost:3000/check-compatibility', {
       method: 'POST',
       headers: {
@@ -77,9 +80,7 @@ export default function EnhancedAddMedicineForm() {
 
   return (
     <div className="max-w-xl mx-auto bg-white p-6 rounded-lg shadow-lg relative">
-      <h2 className="text-lg font-semibold mb-4 text-blue-600">
-        Add new medicine
-      </h2>
+      <h2 className="text-lg font-semibold mb-4 text-blue-600">Add new medicine</h2>
 
       {medicines.map((medicine, index) => (
         <div key={medicine.id} className="mb-4 flex items-center space-x-2">
@@ -113,22 +114,12 @@ export default function EnhancedAddMedicineForm() {
       {error && (
         <div className="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700">
           <div className="flex items-center">
-            <svg
-              className="h-6 w-6 mr-2"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
+            <svg className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <p>{error}</p>
           </div>
-          <button
+          <button 
             className="mt-2 text-blue-500 underline focus:outline-none"
             onClick={() => setShowAlternatives(!showAlternatives)}
           >
@@ -147,6 +138,7 @@ export default function EnhancedAddMedicineForm() {
           </ul>
         </div>
       )}
+
 
       <button
         onClick={handleAddMedicine}
