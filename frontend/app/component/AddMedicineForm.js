@@ -10,19 +10,66 @@ export default function EnhancedAddMedicineForm() {
   const [error, setError] = useState(null);
   const [alternatives, setAlternatives] = useState([]);
   const [showAlternatives, setShowAlternatives] = useState(false);
+  const [loading , setLoading]= useState(false)
+//   const handleAddMedicine = async () => {
+//     setError(null);
+//     setShowAlternatives(false);
+//     // Simulating API call and response
+//     if (newMedicine.toLowerCase() === 'dispirin') {
+//       setError('Possible harmful interaction with Aspirin: Bleeding.');
+//       setAlternatives(['Ibuprofen', 'Naproxen', 'Acetaminophen']);
+//     } else {
+//       setMedicines([...medicines, { id: medicines.length + 1, name: newMedicine }]);
+//       setNewMedicine('');
+//     }
+//   };
+
 
   const handleAddMedicine = async () => {
     setError(null);
-    setShowAlternatives(false);
-    // Simulating API call and response
-    if (newMedicine.toLowerCase() === 'dispirin') {
-      setError('Possible harmful interaction with Aspirin: Bleeding.');
-      setAlternatives(['Ibuprofen', 'Naproxen', 'Acetaminophen']);
+  
+    // Check if the new medicine already exists in the list
+    const medicineExists = medicines.some(
+      (medicine) => medicine.name.toLowerCase() === newMedicine.toLowerCase()
+    );
+  
+    if (medicineExists) {
+      setError('*Medicine already exists in the list.');
+      return;
+    }
+  
+    setLoading(true);
+  
+    // Call the API to check compatibility
+    const response = await fetch('http://localhost:3000/check-compatibility', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        medicinesList: medicines.map(med => med.name),
+        newMedicine: newMedicine,
+      }),
+    });
+  
+    const data = await response.json();
+    setLoading(false);
+  
+    if (data.compatible) {
+      // If compatible, add the new medicine to the list
+      setMedicines([
+        ...medicines,
+        { id: medicines.length + 1, name: newMedicine, hasError: false, errorMessage: '' }
+      ]);
+      setNewMedicine(''); // Clear the input field
     } else {
-      setMedicines([...medicines, { id: medicines.length + 1, name: newMedicine }]);
-      setNewMedicine('');
+      // If not compatible, show the error message
+      const conflictMedicine = data.conflictingMedicine ? data.conflictingMedicine : "existing medicine";
+      setError(`*Harmful interaction with ${conflictMedicine}: ${data.complication}. Choose Alternatives.`);
+      setAlternatives(data.alternatives)
     }
   };
+  
 
   const handleDeleteMedicine = (id) => {
     setMedicines(medicines.filter((medicine) => medicine.id !== id));
@@ -89,11 +136,20 @@ export default function EnhancedAddMedicineForm() {
         </div>
       )}
 
-      <button
+      {/* <button
         onClick={handleAddMedicine}
         className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
       >
+        
         Add new medicine
+      </button> */}
+
+      <button
+        onClick={handleAddMedicine}
+        className={`w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 ${loading ? 'opacity-50 cursor-not-allowed' : ''} `}
+        disabled={loading}
+      >
+        {loading ? 'Checking compatibility...' : 'Add new medicine'}
       </button>
     </div>
   );
