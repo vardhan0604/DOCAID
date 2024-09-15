@@ -29,7 +29,7 @@ export default function EnhancedAddMedicineForm() {
   };
 
   return (
-    <div className="max-w-sm mx-auto bg-white p-6 rounded-lg shadow-lg relative">
+    <div className="max-w-xl mx-auto bg-white p-6 rounded-lg shadow-lg relative">
       <h2 className="text-lg font-semibold mb-4 text-blue-600">Add new medicine</h2>
 
       {medicines.map((medicine, index) => (
